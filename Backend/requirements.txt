@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+httpx
+firecrawl-py
+langchain
+sentence-transformers
