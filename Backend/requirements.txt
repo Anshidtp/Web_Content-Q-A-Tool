@@ -5,3 +5,7 @@ httpx
 firecrawl-py
 langchain
 sentence-transformers
+langchain_community
+faiss-cpu
+langchain-huggingface
+langchain-groq
