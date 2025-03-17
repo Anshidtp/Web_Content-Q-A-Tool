@@ -3,16 +3,21 @@ import os
 import re
 from pathlib import Path
 from typing import List
-from ..models.schema import DocPage
+from models.schema import DocPage
 from dotenv import load_dotenv
 from firecrawl import FirecrawlApp
+from langchain_community.document_loaders import FireCrawlLoader
+load_dotenv()
 
 # Get logger for the scraper module
 logger = logging.getLogger(__name__)
 
 class DocumentationScraper:
     def init(self):
-        self.app = FirecrawlApp()
+        self.app = FireCrawlLoader(
+        api_key=os.getenv("FIRE_CRAWLER_API_KEY"),
+        mode="scrape",
+    )
     
     def get_documentation_links(self, base_url: str) -> list[str]:
 

@@ -6,6 +6,6 @@ firecrawl-py
 langchain
 sentence-transformers
 langchain_community
-faiss-cpu
+langchain_milvus==0.1.8
 langchain-huggingface
 langchain-groq

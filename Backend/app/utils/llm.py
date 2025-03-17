@@ -1,27 +1,34 @@
-import faiss
+from langchain_milvus import Milvus
 from langchain_community.docstore.in_memory import InMemoryDocstore
-from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_ollama import OllamaEmbeddings
+from langchain.embeddings import SentenceTransformerEmbeddings
 from langchain_groq import ChatGroq
-
+import os
+ # store embedding to vector db
+URI = "app/milvus_example.db"
 
 
 class DocumentationRAG:
     def __init__(self):
         # Initialize embeddings and vector store
-        self.embeddings = OllamaEmbeddings(model="nomic-embed-text")
-        self.vector_store = FAISS(
+        self.embeddings = SentenceTransformerEmbeddings(model_name= "all-MiniLM-L6-v2")
+        # Text splitter for chunking
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000, chunk_overlap=200, add_start_index=True
+        )
+        
+        self.vector_store = Milvus(
             embedding_function=self.embeddings,
-            docstore=InMemoryDocstore(),
-            index_to_docstore_id={},
+            connection_args={"uri":  URI},
+            index_params={"index_type": "FLAT", "metric_type": "L2"}
         )
 
         # Initialize LLM
         self.llm = ChatGroq(
+            api_key= os.getenv("API_KEY"),
             model="mixtral-8x7b-32768",
             temperature=0,
             max_tokens=None,
@@ -30,10 +37,7 @@ class DocumentationRAG:
             # other params...
         )
 
-        # Text splitter for chunking
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, chunk_overlap=200, add_start_index=True
-        )
+        
 
         self.prompt = ChatPromptTemplate.from_template(
             """
@@ -55,11 +59,17 @@ class DocumentationRAG:
     def process_documents(self, docs_dir: str):
         """Process documents and add to vector store"""
         # Clear existing documents
-        self.vector_store = FAISS(
+        # self.vector_store = FAISS(
+        #     embedding_function=self.embeddings,
+        #     docstore=InMemoryDocstore(),
+        #     index_to_docstore_id={},
+        # )
+        self.vector_store = Milvus(
             embedding_function=self.embeddings,
-            docstore=InMemoryDocstore(),
-            index_to_docstore_id={},
+            connection_args={"uri": URI},
+            index_params={"index_type": "FLAT", "metric_type": "L2"}
         )
+
 
         # Load and process new documents
         documents = self.load_docs_from_directory(docs_dir)
