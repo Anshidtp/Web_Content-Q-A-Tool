@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Set
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+from firecrawl import FirecrawlApp
 from langchain_community.document_loaders import FireCrawlLoader
 from pydantic import BaseModel, Field
 
@@ -16,9 +17,8 @@ logger = logging.getLogger(__name__)
 
 class DocumentationScraper:
     def __init__(self):
-        self.app = FireCrawlLoader(
-            api_key=settings.FIRECRAWL_API_KEY, 
-            mode="crawl"
+        self.app = FirecrawlApp(
+            api_key=settings.FIRECRAWL_API_KEY
         )
 
     def get_documentation_links(self, base_url: str) -> List[str]:

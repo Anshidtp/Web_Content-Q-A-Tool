@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DOCS_DIR: Path = BASE_DIR / "docs"
     
     # RAG settings
-    MILVUS_URI: str = "./milvus_example.db"
+    MILVUS_URI: str = "./milvus_webrag.db"
     CHUNK_SIZE: int = 1000
     CHUNK_OVERLAP: int = 200
     

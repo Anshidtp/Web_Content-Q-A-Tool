@@ -49,11 +49,9 @@ async def scrape_docs(
 ):
     """Scrape documentation from multiple URLs"""
     try:
-        if not request.docs_name.endswith("-docs"):
-            raise HTTPException(
-                status_code=400, 
-                detail="Documentation name must end with '-docs'"
-            )
+        docs_name = request.docs_name
+        if not docs_name.endswith("-docs"):
+            docs_name = f"{docs_name}-docs"
         
         processed_urls = []
         for url in request.urls:
