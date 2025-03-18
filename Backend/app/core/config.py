@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     DOCS_DIR: Path = BASE_DIR / "docs"
     
     # RAG settings
-    MILVUS_URI: str = "./milvus_webrag.db"
+    # MILVUS_URI: str = "./milvus_webrag.db"
     CHUNK_SIZE: int = 1000
     CHUNK_OVERLAP: int = 200
     
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Create docs directory if it doesn't exist
     def setup_directories(self):
         self.DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        (self.BASE_DIR / "vectorstores").mkdir(parents=True, exist_ok=True)
         
     class Config:
         env_file = ".env"

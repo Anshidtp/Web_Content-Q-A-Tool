@@ -8,7 +8,8 @@ from app.models.schema import (
     ScrapingResponse, 
     QueryResponse, 
     DocsListResponse,
-    StatusResponse
+    StatusResponse,
+    EmbedRequest
 )
 from app.services.scrapper import DocumentationScraper
 from app.services.rag import DocumentationRAG
@@ -71,18 +72,36 @@ async def scrape_docs(
         logger.error(f"Error scraping docs: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/process", response_model=StatusResponse)
+async def process_docs(
+    request: EmbedRequest,
+    rag: DocumentationRAG = Depends(get_rag_service)
+):
+    """Process documentation and embed into vector database"""
+    try:
+        # Process documents
+        rag.process_documents(request.docs_name)
+        
+        return StatusResponse(
+            status="success",
+            details={
+                "docs_name": request.docs_name,
+                "message": f"Successfully processed and embedded documents from {request.docs_name}"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error processing docs: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/query", response_model=QueryResponse)
 async def query_docs(
     request: QueryRequest,
     rag: DocumentationRAG = Depends(get_rag_service)
 ):
-    """Query documentation using RAG"""
+    """Query documentation using RAG (assumes documents are already processed)"""
     try:
-        # Process documents if not already processed
-        rag.process_documents(request.docs_name)
-        
         # Generate response
-        answer, chain_of_thought = rag.query(request.question)
+        answer, chain_of_thought = rag.query(request.question, request.docs_name)
         
         return QueryResponse(
             question=request.question,

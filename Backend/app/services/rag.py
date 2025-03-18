@@ -1,5 +1,6 @@
 import logging
-from typing import Tuple, List
+from typing import Tuple, List,Dict,Any
+import os
 
 from langchain_milvus import Milvus
 from langchain_community.document_loaders import DirectoryLoader
@@ -7,6 +8,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pymilvus import MilvusClient
+from langchain_community.vectorstores import FAISS
+
+
 
 from app.core.config import settings
 
@@ -15,6 +20,12 @@ logger = logging.getLogger(__name__)
 class DocumentationRAG:
     def __init__(self):
         """Initialize the RAG system components"""
+# Store vector databases for each documentation
+        self.vector_stores: Dict[str, Any] = {}
+        
+        # Create vectorstore directory if it doesn't exist
+        os.makedirs(settings.BASE_DIR / "vectorstores", exist_ok=True)
+
         # Initialize embeddings
         logger.info("Initializing embeddings model")
         self.embeddings = HuggingFaceEmbeddings(
@@ -23,11 +34,15 @@ class DocumentationRAG:
         
         # Initialize vector store
         logger.info("Initializing Milvus vector store")
-        self.vector_store = Milvus(
-            embedding_function=self.embeddings,
-            connection_args={"uri": settings.MILVUS_URI},
-            index_params={"index_type": "FLAT", "metric_type": "L2"},
-        )
+        # self.vector_store = Milvus(
+        #     embedding_function=self.embeddings,
+        #     connection_args={"uri": settings.MILVUS_URI},
+        #     index_params={"index_type": "FLAT", "metric_type": "L2"},
+        # )
+
+        # client = MilvusClient("milvus_demo.db")
+        self.vector_store = MilvusClient("milvus_demo.db")
+
         
         # Initialize LLM
         logger.info("Initializing LLM")
@@ -95,14 +110,10 @@ class DocumentationRAG:
             logger.error(f"Error loading documents: {str(e)}")
             return []
 
+    # 
     def process_documents(self, docs_dir: str):
-        """Process documents and add to vector store"""
-        # Skip if already processed
-        if docs_dir in self.processed_docs:
-            logger.info(f"Documents already processed: {docs_dir}")
-            return
-            
-        # Load and process new documents
+        """Process documents and create/update vector store"""
+        # Load documents
         documents = self.load_docs_from_directory(docs_dir)
         
         if not documents:
@@ -114,20 +125,86 @@ class DocumentationRAG:
         chunks = self.text_splitter.split_documents(documents)
         logger.info(f"Created {len(chunks)} chunks")
         
-        # Add to vector store
-        logger.info(f"Adding {len(chunks)} chunks to vector store")
-        self.vector_store.add_documents(chunks)
+        # Create vector store path
+        vector_store_path = settings.BASE_DIR / "vectorstores" / docs_dir
         
-        # Mark as processed
-        self.processed_docs.add(docs_dir)
-        logger.info(f"Documents processed: {docs_dir}")
+        # Create or update vector store
+        if os.path.exists(vector_store_path):
+            logger.info(f"Updating existing vector store for {docs_dir}")
+            # Load existing vector store
+            vector_store = FAISS.load_local(str(vector_store_path), self.embeddings)
+            # Add new documents
+            vector_store.add_documents(chunks)
+        else:
+            logger.info(f"Creating new vector store for {docs_dir}")
+            # Create new vector store
+            vector_store = FAISS.from_documents(chunks, self.embeddings)
+            # Save vector store
+            vector_store.save_local(str(vector_store_path))
+        
+        # Store in memory
+        self.vector_stores[docs_dir] = vector_store
+        
+        logger.info(f"Successfully processed documents for {docs_dir}")
 
-    def query(self, question: str) -> Tuple[str, str]:
+    # def query(self, question: str) -> Tuple[str, str]:
+    #     """Query the documentation"""
+    #     logger.info(f"Processing query: {question}")
+        
+    #     # Get relevant documents
+    #     docs = self.vector_store.similarity_search(question, k=3)
+    #     logger.info(f"Retrieved {len(docs)} relevant documents")
+        
+    #     # Combine context
+    #     context = "\n\n".join([doc.page_content for doc in docs])
+        
+    #     # Generate response
+    #     logger.info("Generating response")
+    #     chain = self.prompt | self.llm
+    #     response = chain.invoke({"context": context, "question": question})
+        
+    #     # Extract chain of thought and response
+    #     response_text = response.content
+        
+    #     # If no think tags, provide a fallback
+    #     if "<think>" not in response_text:
+    #         chain_of_thought = "Analyzed the context and generated a response based on the provided documentation."
+    #         answer = response_text
+    #     else:
+    #         # Extract chain of thought between <think> and </think>
+    #         chain_of_thought = response_text.split("<think>")[1].split("</think>")[0].strip()
+    #         # Extract response after </think>
+    #         answer = response_text.split("</think>")[1].strip()
+        
+    #     logger.info("Query processed successfully")
+    #     return answer, chain_of_thought
+    def get_vector_store(self, docs_dir: str):
+        """Get or load vector store for a documentation directory"""
+        # Check if vector store exists in memory
+        if docs_dir in self.vector_stores:
+            return self.vector_stores[docs_dir]
+        
+        # Check if vector store exists on disk
+        vector_store_path = settings.BASE_DIR / "vectorstores" / docs_dir
+        if os.path.exists(vector_store_path):
+            logger.info(f"Loading vector store from disk for {docs_dir}")
+            vector_store = FAISS.load_local(str(vector_store_path), self.embeddings)
+            self.vector_stores[docs_dir] = vector_store
+            return vector_store
+        
+        # If not found, raise error
+        logger.error(f"Vector store not found for {docs_dir}. Please process documents first.")
+        raise ValueError(f"Vector store not found for {docs_dir}. Please process documents first.")
+
+    def query(self, question: str, docs_dir: str) -> Tuple[str, str]:
         """Query the documentation"""
-        logger.info(f"Processing query: {question}")
+        logger.info(f"Processing query for {docs_dir}: {question}")
+        
+        # Get vector store
+        vector_store = self.get_vector_store(docs_dir)
         
         # Get relevant documents
-        docs = self.vector_store.similarity_search(question, k=3)
+        docs = vector_store.similarity_search(question, k=3)
         logger.info(f"Retrieved {len(docs)} relevant documents")
         
         # Combine context

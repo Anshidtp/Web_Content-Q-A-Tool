@@ -24,6 +24,9 @@ class ScrapingResponse(BaseModel):
     success: bool = Field(..., description="Whether the scraping was successful")
     message: str = Field(..., description="Status message")
 
+class EmbedRequest(BaseModel):
+    docs_name: str = Field(..., description="Name of the documentation directory to query")
+
 class QueryResponse(BaseModel):
     question: str = Field(..., description="Original question")
     answer: str = Field(..., description="Answer to the question")
