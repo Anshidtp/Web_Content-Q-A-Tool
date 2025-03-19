@@ -2,13 +2,13 @@ import logging
 from typing import Tuple, List,Dict,Any
 import os
 
-from langchain_milvus import Milvus
+#from langchain_milvus import Milvus
 from langchain_community.document_loaders import DirectoryLoader
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pymilvus import MilvusClient
+# from pymilvus import MilvusClient
 from langchain_community.vectorstores import FAISS
 
 
@@ -33,7 +33,7 @@ class DocumentationRAG:
         )
         
         # Initialize vector store
-        logger.info("Initializing Milvus vector store")
+        #logger.info("Initializing faiss vector store")
         # self.vector_store = Milvus(
         #     embedding_function=self.embeddings,
         #     connection_args={"uri": settings.MILVUS_URI},
@@ -41,7 +41,7 @@ class DocumentationRAG:
         # )
 
         # client = MilvusClient("milvus_demo.db")
-        self.vector_store = MilvusClient("milvus_demo.db")
+        #self.vector_store = MilvusClient("milvus_demo.db")
 
         
         # Initialize LLM
@@ -188,7 +188,9 @@ class DocumentationRAG:
         vector_store_path = settings.BASE_DIR / "vectorstores" / docs_dir
         if os.path.exists(vector_store_path):
             logger.info(f"Loading vector store from disk for {docs_dir}")
-            vector_store = FAISS.load_local(str(vector_store_path), self.embeddings)
+            vector_store = FAISS.load_local(str(vector_store_path), 
+                                            self.embeddings,
+                                            allow_dangerous_deserialization=True)
             self.vector_stores[docs_dir] = vector_store
             return vector_store
         
