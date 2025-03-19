@@ -1,6 +1,7 @@
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List, Dict
+import asyncio
 
 from app.models.schema import (
     ScrapingRequest, 
@@ -53,6 +54,14 @@ async def scrape_docs(
         docs_name = request.docs_name
         if not docs_name.endswith("-docs"):
             docs_name = f"{docs_name}-docs"
+        
+        # # Create scraping tasks for each URL
+        # async def scrape_url(url):
+        #     return await scraper.pull_docs(str(url), request.docs_name, request.n_pages)
+            
+        # # Gather and execute all scraping tasks concurrently    
+        # tasks = [scrape_url(url) for url in request.urls]
+        # processed_urls = await asyncio.gather(*tasks)
         
         processed_urls = []
         for url in request.urls:

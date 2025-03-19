@@ -6,7 +6,7 @@ firecrawl-py
 langchain
 sentence-transformers
 langchain_community
-langchain_milvus==0.1.8
 langchain-huggingface
 langchain-groq
 python-multipart
+unstructured[md]

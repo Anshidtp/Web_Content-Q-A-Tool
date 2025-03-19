@@ -82,7 +82,8 @@ class DocumentationScraper:
         for page in doc_pages:
             # Create a safe filename based on the URL
             url_path = page.url.split("://")[1] if "://" in page.url else page.url
-            safe_filename = url_path.strip("/").replace("/", "-")
+            safe_filename = re.sub(r'[<>:"/\\|?*]', '-', url_path.split('?')[0])
+            safe_filename = safe_filename.strip("/").replace("/", "-")
             filepath = docs_path / f"{safe_filename}.md"
 
             with open(filepath, "w", encoding="utf-8") as f:
@@ -98,4 +99,4 @@ class DocumentationScraper:
         """Pull documentation from a URL and save it to the specified directory."""
         doc_pages = self.scrape_documentation(base_url, n_pages)
         self.save_documentation_pages(doc_pages, docs_dir)
-        return len(doc_pages)
+        return len(doc_pages) 
