@@ -24,6 +24,10 @@ class ScrapingResponse(BaseModel):
     success: bool = Field(..., description="Whether the scraping was successful")
     message: str = Field(..., description="Status message")
 
+class LastProcessedDoc(BaseModel):
+    docs_name: str = Field(..., description="Name of the last processed documentation")
+    processed_at: str = Field(..., description="Timestamp when the doc was processed")
+
 class EmbedRequest(BaseModel):
     docs_name: str = Field(..., description="Name of the documentation directory to query")
 

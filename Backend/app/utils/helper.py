@@ -7,7 +7,7 @@ from app.core.config import settings
 def get_existing_docs() -> List[str]:
     """Get all documentation directories with -docs suffix"""
     docs_dir = settings.DOCS_DIR
-    docs_dirs = [path.name for path in docs_dir.glob("*-docs") if path.is_dir()]
+    docs_dirs = [path.name for path in docs_dir.glob("*") if path.is_dir()]
     return docs_dirs
 
 def get_doc_page_count(docs_dir: str) -> int:
