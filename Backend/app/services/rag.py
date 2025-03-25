@@ -32,16 +32,6 @@ class DocumentationRAG:
             model_name="sentence-transformers/all-mpnet-base-v2"
         )
         
-        # Initialize vector store
-        #logger.info("Initializing faiss vector store")
-        # self.vector_store = Milvus(
-        #     embedding_function=self.embeddings,
-        #     connection_args={"uri": settings.MILVUS_URI},
-        #     index_params={"index_type": "FLAT", "metric_type": "L2"},
-        # )
-
-        # client = MilvusClient("milvus_demo.db")
-        #self.vector_store = MilvusClient("milvus_demo.db")
 
         
         # Initialize LLM
@@ -65,19 +55,6 @@ class DocumentationRAG:
         # RAG prompt template
         self.prompt = ChatPromptTemplate.from_template(
             """
-            <think>
-            I'll answer this question using only the information provided in the documentation context.
-            Let me analyze the context and extract the most relevant information.
-            
-            Context provided:
-            {context}
-            
-            Question:
-            {question}
-            
-            Based on the context, I'll provide a clear and concise answer, focusing on the most relevant information.
-            </think>
-            
             You are an expert documentation assistant. Use the following documentation context
             to answer the question. If you don't know the answer, just say that you don't
             have enough information. Keep the answer concise and clear.
@@ -147,37 +124,7 @@ class DocumentationRAG:
         
         logger.info(f"Successfully processed documents for {docs_dir}")
 
-    # def query(self, question: str) -> Tuple[str, str]:
-    #     """Query the documentation"""
-    #     logger.info(f"Processing query: {question}")
-        
-    #     # Get relevant documents
-    #     docs = self.vector_store.similarity_search(question, k=3)
-    #     logger.info(f"Retrieved {len(docs)} relevant documents")
-        
-    #     # Combine context
-    #     context = "\n\n".join([doc.page_content for doc in docs])
-        
-    #     # Generate response
-    #     logger.info("Generating response")
-    #     chain = self.prompt | self.llm
-    #     response = chain.invoke({"context": context, "question": question})
-        
-    #     # Extract chain of thought and response
-    #     response_text = response.content
-        
-    #     # If no think tags, provide a fallback
-    #     if "<think>" not in response_text:
-    #         chain_of_thought = "Analyzed the context and generated a response based on the provided documentation."
-    #         answer = response_text
-    #     else:
-    #         # Extract chain of thought between <think> and </think>
-    #         chain_of_thought = response_text.split("<think>")[1].split("</think>")[0].strip()
-    #         # Extract response after </think>
-    #         answer = response_text.split("</think>")[1].strip()
-        
-    #     logger.info("Query processed successfully")
-    #     return answer, chain_of_thought
+    
     def get_vector_store(self, docs_dir: str):
         """Get or load vector store for a documentation directory"""
         # Check if vector store exists in memory

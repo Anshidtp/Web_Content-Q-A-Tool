@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # LLM settings
     GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY", "")
-    LLM_MODEL: str = "llama-3.1-8b-instant"
+    LLM_MODEL: str = "deepseek-r1-distill-qwen-32b"
     
     # Scraper settings
     FIRECRAWL_API_KEY: str = os.environ.get("FIRECRAWL_API_KEY", "")

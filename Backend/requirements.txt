@@ -2,6 +2,7 @@ fastapi
 uvicorn
 pydantic
 httpx
+faiss-cpu
 firecrawl-py
 langchain
 sentence-transformers
