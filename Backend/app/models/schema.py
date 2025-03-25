@@ -5,8 +5,7 @@ from pydantic import BaseModel, Field, HttpUrl
 class ScrapingRequest(BaseModel):
     urls: List[HttpUrl] = Field(..., description="List of documentation URLs to scrape")
     docs_name: str = Field(..., description="Name of the documentation directory")
-    n_pages: Optional[int] = Field(None, description="Limit the number of pages to scrape (None for all pages)")
-
+    n_pages: Optional[int] = 1
 class QueryRequest(BaseModel):
     question: str = Field(..., description="Question to ask about the documentation")
     docs_name: str = Field(..., description="Name of the documentation directory to query")
