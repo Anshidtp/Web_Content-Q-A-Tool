@@ -1,36 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  DocumentMagnifyingGlassIcon, 
-  ChatBubbleLeftRightIcon, 
-  GlobeAltIcon 
-} from '@heroicons/react/24/outline';
-import axios from 'axios';
+import { ChatBubbleLeftRightIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
-function DocumentCard({ document, onRefresh }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleProcessDocument = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      await axios.post('http://localhost:8000/api/process', {
-        docs_name: document.name
-      });
-      onRefresh();
-    } catch (err) {
-      setError('Processing failed');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function DocumentCard({ document }) {
   const openSourceWebsite = () => {
-    const url = document.urls && document.urls.length > 0 
-      ? document.urls[0] 
-      : null;
+    const url = document.urls && document.urls.length > 0 ? document.urls[0] : null;
     if (url) window.open(url, '_blank');
   };
 
@@ -46,19 +20,6 @@ function DocumentCard({ document, onRefresh }) {
       </div>
 
       <div className="flex space-x-2">
-        <button 
-          onClick={handleProcessDocument}
-          disabled={loading}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-md transition ${
-            loading 
-              ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
-              : 'bg-primary-600 text-white hover:bg-primary-700'
-          }`}
-        >
-          <DocumentMagnifyingGlassIcon className="h-5 w-5" />
-          <span>Load</span>
-        </button>
-
         <Link 
           to={`/chat/${document.name}`}
           className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-800 hover:bg-green-200 rounded-md transition"
@@ -75,12 +36,6 @@ function DocumentCard({ document, onRefresh }) {
           <span>Visit Site</span>
         </button>
       </div>
-
-      {error && (
-        <div className="text-red-500 text-sm mt-2">
-          {error}
-        </div>
-      )}
     </div>
   );
 }

@@ -47,13 +47,13 @@ function Home() {
         <h1 className="text-3xl font-bold text-primary-900">
           Your Documentation Library
         </h1>
-        <Link 
+        {/* <Link 
           to="/scrape" 
           className="flex items-center space-x-2 bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
         >
           <PlusIcon className="h-5 w-5" />
           <span>Add New Docs</span>
-        </Link>
+        </Link> */}
       </div>
 
       {loading ? (
