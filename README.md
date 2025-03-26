@@ -1,6 +1,6 @@
 # Web_Content-Q-A-Tool  🔍📚
 
-![DEMO](https://github.com/Anshidtp/Web_Content-Q-A-Tool/blob/main/Resource/sample%20demo.mp4)
+![DEMO](https://github.com/Anshidtp/Web_Content-Q-A-Tool/blob/main/Resource/sample.gif)
 
 An advanced FastAPI-powered website scraping and question-answering system leveraging RAG (Retrieval-Augmented Generation) technology.
 
