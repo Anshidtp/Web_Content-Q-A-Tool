@@ -10,7 +10,7 @@ function Navbar() {
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
               <DocumentTextIcon className="h-8 w-8 text-primary-600 mr-2" />
-              <span className="text-2xl font-bold text-primary-900">WEB CONTENT QnA TOOL</span>
+              <span className="text-2xl font-bold text-primary-900">WebQuery AI</span>
             </Link>
           </div>
           <div className="flex space-x-4">
